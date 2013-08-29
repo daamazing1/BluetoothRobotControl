@@ -22,12 +22,16 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
+	private static final int REQUEST_ENABLE_BT = 1;
+	private static final String SERIAL_PORT_SERVICE = "00001101-0000-1000-8000-00805f9b34fb";
+	
 	TextView arduinoData;
 	Spinner devicesSpinner;
 	
-	
+	BluetoothAdapter mBluetoothAdapter;
 	BluetoothDevice mmDevice;
 	BluetoothSocket mmSocket;
 	OutputStream mmOutputStream;
@@ -41,6 +45,15 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		//If we have no Bluetooth adapter we are done.
+		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+		if(mBluetoothAdapter == null){
+			Toast.makeText(this, R.string.bluetooth_not_available, Toast.LENGTH_LONG).show();
+	        finish();
+	        return;
+		}
+		
 		setContentView(R.layout.activity_main);		
 		
 		devicesSpinner = (Spinner) findViewById(R.id.bluetooth_devices);		
@@ -53,20 +66,13 @@ public class MainActivity extends Activity {
 		ImageButton btnStop = (ImageButton)findViewById(R.id.btnStop);
 		Button btnConnect = (Button)findViewById(R.id.connect);
 		
-		findBT();
-		
 		btnConnect.setOnClickListener(new View.OnClickListener(){
 			public void onClick(View v)
 			{
-				BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-				Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-				if(pairedDevices.size() > 0){
-					for(BluetoothDevice device : pairedDevices){
-						if(device.getName().toString().equals(devicesSpinner.getSelectedItem().toString())){
-							mmDevice = device;
-						}
-					}
-				}
+				String[] deviceSplit = devicesSpinner.getSelectedItem().toString().split("\n");
+				mmDevice = mBluetoothAdapter.getRemoteDevice(deviceSplit[1].toString());
+				
+				
 				openBT();
 			}
 		});
@@ -127,6 +133,33 @@ public class MainActivity extends Activity {
 		});
 	}
 
+	protected void onStart() {
+        super.onStart();
+        // If Bluetooth is not on, request that it be enabled.
+        if (!mBluetoothAdapter.isEnabled()) {
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+        } else {
+            initialize();
+        }
+    }
+	
+	/**
+     * Ensures user has turned on Bluetooth on the Android device.
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+        case REQUEST_ENABLE_BT:
+            if (resultCode == Activity.RESULT_OK) {
+                initialize();
+            } else {
+                finish();
+                return;
+            }
+        }
+    }
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -134,18 +167,12 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
-	void findBT(){
-		BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-		if(mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()){
-			Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-		    startActivityForResult(enableBtIntent, 1);
-		}
-		
+	void initialize(){
 		Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
 		if(pairedDevices.size() > 0){
 			List<String> s = new ArrayList<String>();
 			for(BluetoothDevice device : pairedDevices){
-				s.add(device.getName());
+				s.add(device.getName() + "\n" + device.getAddress());
 			}
 			ArrayAdapter<String> devicesAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, s);
 			devicesSpinner.setAdapter(devicesAdapter);
@@ -153,9 +180,10 @@ public class MainActivity extends Activity {
 	}
 	
 	void openBT(){
+		//mBluetoothAdapter.cancelDiscovery();
 		
 		try{
-			UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); //Standard SerialPortService ID
+			UUID uuid = UUID.fromString(SERIAL_PORT_SERVICE); //Standard SerialPortService ID
 			mmSocket = mmDevice.createInsecureRfcommSocketToServiceRecord(uuid);
 			mmSocket.connect();
 			mmOutputStream = mmSocket.getOutputStream();
@@ -163,6 +191,7 @@ public class MainActivity extends Activity {
 		}
 		catch(IOException ex)
 		{
+			Toast.makeText(this, R.string.bluetooth_connection_failed, Toast.LENGTH_LONG).show();
 			try {
                 mmSocket.close();
             } catch (IOException closeException) { }
