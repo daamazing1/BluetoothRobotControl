@@ -54,6 +54,7 @@ public final class R {
         public static final int bluetooth_not_available=0x7f050004;
         public static final int connect=0x7f050002;
         public static final int devices=0x7f050003;
+        public static final int disconnect=0x7f050006;
     }
     public static final class style {
         /** 

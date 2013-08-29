@@ -69,11 +69,21 @@ public class MainActivity extends Activity {
 		btnConnect.setOnClickListener(new View.OnClickListener(){
 			public void onClick(View v)
 			{
-				String[] deviceSplit = devicesSpinner.getSelectedItem().toString().split("\n");
-				mmDevice = mBluetoothAdapter.getRemoteDevice(deviceSplit[1].toString());
-				
-				
-				openBT();
+				Button btnConnect = (Button)findViewById(R.id.connect);
+				if(btnConnect.getText() == getResources().getString(R.string.connect)){
+					String[] deviceSplit = devicesSpinner.getSelectedItem().toString().split("\n");
+					mmDevice = mBluetoothAdapter.getRemoteDevice(deviceSplit[1].toString());
+					openBT();
+				}
+				else{
+					if(mmSocket.isConnected()){
+						btnConnect.setText(R.string.connect);
+						try {
+							closeBT();
+			            } catch (IOException closeException) { }
+						
+					}
+				}
 			}
 		});
 		
@@ -180,7 +190,7 @@ public class MainActivity extends Activity {
 	}
 	
 	void openBT(){
-		//mBluetoothAdapter.cancelDiscovery();
+		Button btnConnect = (Button)findViewById(R.id.connect);
 		
 		try{
 			UUID uuid = UUID.fromString(SERIAL_PORT_SERVICE); //Standard SerialPortService ID
@@ -188,10 +198,12 @@ public class MainActivity extends Activity {
 			mmSocket.connect();
 			mmOutputStream = mmSocket.getOutputStream();
 			mmInputStream = mmSocket.getInputStream();
+			btnConnect.setText(R.string.disconnect);
 		}
 		catch(IOException ex)
 		{
 			Toast.makeText(this, R.string.bluetooth_connection_failed, Toast.LENGTH_LONG).show();
+			btnConnect.setText(R.string.connect);
 			try {
                 mmSocket.close();
             } catch (IOException closeException) { }
