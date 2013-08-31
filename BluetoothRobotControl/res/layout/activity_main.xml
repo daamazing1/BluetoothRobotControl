@@ -82,4 +82,22 @@
         android:layout_centerHorizontal="true"
         android:src="@drawable/x_alt_32x32" />
 
+    <SeekBar
+        android:id="@+id/lineSpeed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/turnSpeed"
+        android:layout_alignLeft="@+id/turnSpeed"
+        android:layout_marginBottom="25dp"
+        android:max="255" />
+
+    <SeekBar
+        android:id="@+id/turnSpeed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/arduinoData"
+        android:layout_alignLeft="@+id/arduinoData"
+        android:layout_marginBottom="27dp"
+        android:max="255" />
+
 </RelativeLayout>
