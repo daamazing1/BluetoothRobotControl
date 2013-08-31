@@ -1,5 +1,5 @@
-BluetoothRobotControl
-=====================
+Bluetooth Robot Controller
+==========================
 
 This is a simple Android application which uses Bluetooth to interact with an Arduino robot as a remote control.  
 
