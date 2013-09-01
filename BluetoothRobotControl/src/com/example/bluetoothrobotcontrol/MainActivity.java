@@ -20,6 +20,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -65,6 +67,8 @@ public class MainActivity extends Activity {
 		ImageButton btnLeft = (ImageButton)findViewById(R.id.btnLeft);
 		ImageButton btnStop = (ImageButton)findViewById(R.id.btnStop);
 		Button btnConnect = (Button)findViewById(R.id.connect);
+		SeekBar lineSpeed = (SeekBar)findViewById(R.id.lineSpeed);
+		SeekBar turnSpeed = (SeekBar)findViewById(R.id.turnSpeed);		
 		
 		btnConnect.setOnClickListener(new View.OnClickListener(){
 			public void onClick(View v)
@@ -92,9 +96,10 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				try{
-					mmOutputStream.write('8');
+					mmOutputStream.write("8*".getBytes());
 				}
 				catch(IOException ex){}
+				catch(NullPointerException ex){}
 			}
 		});
 		
@@ -103,9 +108,10 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				try{
-					mmOutputStream.write('2');
+					mmOutputStream.write("2*".getBytes());
 				}
 				catch(IOException ex){}
+				catch(NullPointerException ex){}
 			}
 		});
 		
@@ -114,9 +120,10 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				try{
-					mmOutputStream.write('4');
+					mmOutputStream.write("4*".getBytes());
 				}
-				catch(IOException ex){}				
+				catch(IOException ex){}		
+				catch(NullPointerException ex){}
 			}
 		});
 		
@@ -125,9 +132,10 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				try{
-					mmOutputStream.write('6');
+					mmOutputStream.write("6*".getBytes());
 				}
 				catch(IOException ex){}
+				catch(NullPointerException ex){}
 			}
 		});
 		
@@ -136,10 +144,38 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				try{
-					mmOutputStream.write('5');
+					mmOutputStream.write("5*".getBytes());
 				}
 				catch(IOException ex){}
 			}
+		});
+	
+		lineSpeed.setOnSeekBarChangeListener(new OnSeekBarChangeListener(){
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+			{
+				try{
+					mmOutputStream.write(("S" + progress + "*").getBytes());
+				}
+				catch(IOException ex){}		
+				catch(NullPointerException ex){}
+		    }
+			public void onStartTrackingTouch(SeekBar seekBar){}
+
+			public void onStopTrackingTouch(SeekBar seekBar){}
+		});
+		
+		turnSpeed.setOnSeekBarChangeListener(new OnSeekBarChangeListener(){
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+			{
+				try{
+					mmOutputStream.write(("T" + progress + "*").getBytes());
+				}
+				catch(IOException ex){}		
+				catch(NullPointerException ex){}
+		    }
+			public void onStartTrackingTouch(SeekBar seekBar){}
+
+			public void onStopTrackingTouch(SeekBar seekBar){}
 		});
 	}
 
